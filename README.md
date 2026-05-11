@@ -1,5 +1,7 @@
 # sounds-like-skill-issue
 
+![Claude Code, fighter jet, cat](./etc/claude-code-fighter-jet-cat.jpeg)
+
 A personal collection of Claude Code plugins that work universally across projects. Hosted locally on my laptop — not published to any public marketplace.
 
 ## Layout
