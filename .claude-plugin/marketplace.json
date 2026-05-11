@@ -10,12 +10,17 @@
     {
       "name": "starter",
       "description": "Starter plugin — example skill, command, and hook scaffolding",
-      "source": "./starter"
+      "source": "./plugins/starter"
     },
     {
       "name": "outsource",
       "description": "Jira ticket URL → review-ready PR (worktree, branch, impl, tests, gh pr create)",
-      "source": "./outsource"
+      "source": "./plugins/outsource"
+    },
+    {
+      "name": "deskill-me",
+      "description": "Install or update every plugin in this marketplace in one go (/deskill-me)",
+      "source": "./plugins/deskill-me"
     }
   ]
 }

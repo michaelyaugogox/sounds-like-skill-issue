@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Grep",
+      "Glob",
+
+      "Bash(pwd)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+
+      "Bash(git fetch *)",
+      "Bash(git symbolic-ref *)",
+      "Bash(git status*)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git branch *)",
+      "Bash(git worktree *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git rev-parse *)",
+
+      "Bash(gh pr create *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+
+      "Bash(npm run *)",
+      "Bash(npm test*)",
+      "Bash(npm install*)",
+      "Bash(pnpm *)",
+      "Bash(yarn *)",
+      "Bash(bun *)",
+      "Bash(pytest*)",
+      "Bash(ruff *)",
+      "Bash(mypy *)",
+      "Bash(tsc *)",
+      "Bash(make *)",
+
+      "mcp__claude_ai_Atlassian_Rovo__getJiraIssue",
+      "mcp__claude_ai_Atlassian_Rovo__searchJiraIssuesUsingJql",
+      "mcp__claude_ai_Atlassian_Rovo__getJiraIssueRemoteIssueLinks",
+      "mcp__claude_ai_Atlassian_Rovo__getTransitionsForJiraIssue",
+
+      "Agent"
+    ]
+  }
+}

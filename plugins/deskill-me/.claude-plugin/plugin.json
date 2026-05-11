@@ -1,0 +1,9 @@
+{
+  "name": "deskill-me",
+  "version": "0.1.0",
+  "description": "Install or update every plugin listed in the sounds-like-skill-issue marketplace in one go",
+  "author": {
+    "name": "Michael Yau",
+    "email": "michael.yau@gogox.com"
+  }
+}

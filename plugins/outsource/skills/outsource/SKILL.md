@@ -9,6 +9,20 @@ Take a Jira ticket from URL → merged-ready PR. Each step has a gate; if a gate
 
 **Plan mode:** if the caller passes `--plan` (via `/outsource`) or asks for a plan, run Step 3 and wait for approval before any file edits. Otherwise skip Step 3.
 
+**One ticket per invocation.** This skill handles a single Jira ticket end-to-end. If the caller has multiple tickets, they should spawn one subagent per ticket in parallel (the `/outsource` command does this automatically when given multiple URLs). Plan mode is incompatible with parallel multi-ticket runs because it requires interactive approval.
+
+## Execution model — subagents within one ticket
+
+Even for a single ticket, this skill is multi-agent. You (the orchestrator running in the main session) coordinate the flow and delegate three phases to subagents:
+
+- **Step 3 (Plan mode only):** a parallel **Explorer** subagent maps the codebase while you draft the plan from the Jira details.
+- **Step 5.5 (always):** a **Reviewer** subagent reads the final diff and returns a verdict before you open the PR. Runs in parallel with the test suite executing.
+- **Steps 1, 2, 4, 5, 6, 7** stay in the main session — they either need user interaction (Step 1 ambiguity check, Step 3 approval) or benefit from iterative feedback (Step 4 implementation reacting to type/lint errors).
+
+Subagents inside this skill operate in the **same worktree** as the main session (no `isolation: "worktree"` — that flag is for parallel *ticket* fan-out, where each ticket needs its own filesystem). They read and may edit files in the worktree directly.
+
+When invoking a subagent, pass it a self-contained prompt: the ticket key, the worktree path, the specific question or task, and the shape of the response you want back. The subagent has no access to this conversation.
+
 ## Inputs
 
 - A Jira ticket URL (required), e.g. `https://gogox.atlassian.net/browse/ABC-1234`.
@@ -72,8 +86,10 @@ Otherwise skip to Step 4.
 
 **How to plan:**
 
-1. Inside the worktree, explore the relevant code (read, not edit). Identify the files you'll touch, the approach, and the test strategy.
-2. Present a plan back to the user with these sections:
+1. **Spawn an Explorer subagent in parallel with your own analysis.** In a single response, kick off:
+   - An `Agent` call with `subagent_type: "Explore"` and a self-contained prompt: "Inside the worktree at `<path>`, map the code areas relevant to Jira ticket `<KEY>`: `<summary>`. Identify the specific files that would need to change, existing patterns/conventions in those files (test layout, error handling, naming), and any nearby code that might be affected. Return a structured report: relevant files (with one-line purpose each), conventions to follow, and surprises/risks. Do not edit anything."
+   - Your own deeper read of the Jira details, linked issues, and acceptance criteria — anything that informs the *what*, not the *where*.
+2. When the Explorer returns, merge its findings with your ticket analysis. Present a plan back to the user with these sections:
    - **Approach** — 2-4 sentences on the implementation strategy.
    - **Files to change** — bulleted list with one line per file describing the edit.
    - **New files** — list with purpose, or "none".
@@ -108,6 +124,23 @@ If tests exist:
 - Run the full test suite. **Do not open a PR if tests fail** — fix or report.
 
 If no test infrastructure exists, skip this step and note it in the PR description.
+
+## Step 5.5 — Independent review (always)
+
+Before opening the PR, get a fresh perspective on the diff. A reviewer subagent with no implementation context catches scope creep, missed edge cases, and obvious-in-hindsight bugs better than the agent that just wrote the code.
+
+Run the review **in parallel with the test suite** to hide its latency:
+
+1. Stage your changes mentally (you don't need to `git add` yet) and capture the diff: `git diff origin/main...HEAD`.
+2. In a single response, kick off both:
+   - The test suite (Bash) if you haven't already in Step 5.
+   - An `Agent` call with `subagent_type: "general-purpose"` and a self-contained prompt: "You are an independent code reviewer for Jira ticket `<KEY>`: `<summary>`. Acceptance criteria: `<AC>`. Review the diff below against (a) the acceptance criteria — did the change actually deliver what was asked? (b) correctness — bugs, race conditions, error handling gaps. (c) scope — anything that doesn't belong to this ticket. (d) repo conventions visible in surrounding files. Return a verdict of `APPROVE`, `REQUEST_CHANGES`, or `BLOCK`, followed by a bulleted list of findings (most important first). Be concrete: file path, line, what's wrong. Do not edit files. Diff:\n\n<paste full diff here>"
+3. When the reviewer returns:
+   - `APPROVE` → proceed to Step 6.
+   - `REQUEST_CHANGES` → address each finding by looping back to Step 4. Re-run Step 5 and Step 5.5 after the fix. Don't argue with the reviewer; if you genuinely disagree with a finding, surface it to the user before discarding it.
+   - `BLOCK` → stop and report to the user. Do not open the PR.
+
+Cap this loop at **two review cycles**. If the reviewer still requests changes after the second pass, stop and hand back to the user with both reviews — the disagreement probably needs human judgment.
 
 ## Step 6 — Open the PR
 
