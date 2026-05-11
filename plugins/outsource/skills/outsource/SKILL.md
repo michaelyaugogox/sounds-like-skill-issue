@@ -125,6 +125,35 @@ If tests exist:
 
 If no test infrastructure exists, skip this step and note it in the PR description.
 
+## Step 5.4 — Frontend verification (only if the diff touches UI)
+
+Automated tests don't catch visual regressions or interaction bugs. If the change touches the frontend, drive a real browser before opening the PR.
+
+**When this step applies:**
+
+Run `git diff --name-only origin/main...HEAD` and check whether any changed path matches frontend signals: `*.tsx`, `*.jsx`, `*.vue`, `*.svelte`, `*.css`, `*.scss`, `*.html`, or lives under a typical frontend directory (`src/components/`, `app/`, `pages/`, `views/`, `public/`). If none match, skip this step entirely.
+
+**How to verify:**
+
+1. **Check the agent has browser access.** Claude Code's Chrome integration (the `Claude in Chrome` extension, enabled via `claude --chrome` or `/chrome`) lets the agent drive a real browser. If you can call browser tools (navigate, click, screenshot) in this session, proceed. If not, fall back: list the manual verification steps for the user in the PR body's Test plan and skip the automated drive.
+2. **Start the dev server** in the worktree. Look at `package.json` `scripts` for the conventional entry point — usually `dev`, `start`, or `serve`. Run it in the background (`run_in_background: true`) and wait for the server to be reachable (Monitor the process output for the "ready on http://localhost:PORT" line; don't sleep-poll).
+3. **Drive the golden path.** Open the dev URL in the browser, navigate to the changed feature, and perform the primary user flow described in the ticket's acceptance criteria. For each AC bullet, exercise it once.
+4. **Use DevTools to verify, not just look.** The Chrome integration exposes DevTools data the same way a human developer would inspect it. Walk through these passes after exercising each acceptance-criterion flow:
+   - **Console**: read all messages emitted during the interaction. Compare against a baseline captured on `origin/main` for the same flow. New errors or warnings are a finding — treat them like a failed test.
+   - **Network**: inspect requests fired by the interaction. Look for: failed responses (4xx/5xx), unexpected requests (calls to wrong endpoints, missing auth headers, leaking PII in query strings), duplicate requests (rendering bugs that re-fetch), and slow requests that block UI.
+   - **DOM / Elements**: confirm the element being acted on actually matches what the ticket asked for — right text, right `data-testid`, right ARIA attributes. Spot-check that no stale debug attributes (`data-temp-*`, `?dev=1`) leaked into the diff.
+   - **Application / Storage** (if the ticket touches auth, sessions, feature flags, or persistence): inspect localStorage, sessionStorage, cookies, IndexedDB to confirm the change writes/reads the right keys and doesn't leave behind orphans.
+   - **Performance / rendering**: for anything in a list or table view, scroll and watch for layout thrash, jank, or N+1 rendering patterns visible in the Performance panel. Not every ticket needs this — only when the change touches rendering hot paths.
+   Record each DevTools finding with its source panel (e.g. "Network: POST /api/orders returned 500 — see screenshot"). Vague "looked fine" reports are not verification.
+5. **Capture evidence.** Screenshot the key UI states *and* the relevant DevTools panel when a finding appears (Network tab showing the failed request, Console tab showing the error stack). Save them under `/tmp/outsource-{ticket-key}-{n}.png` and reference them in the PR body's Test plan so reviewers can see what you saw.
+6. **Stop the dev server** once verification is done (kill the background process).
+
+**Failure handling:**
+
+- Visual regression or broken interaction → loop back to Step 4 to fix. Re-run this step after the fix.
+- Console errors in unrelated areas → note them in the PR body but don't block (they're a separate ticket).
+- Browser/Chrome integration not available and no manual fallback documented → surface to the user before opening the PR; don't silently skip verification on a UI change.
+
 ## Step 5.5 — Independent review (always)
 
 Before opening the PR, get a fresh perspective on the diff. A reviewer subagent with no implementation context catches scope creep, missed edge cases, and obvious-in-hindsight bugs better than the agent that just wrote the code.
