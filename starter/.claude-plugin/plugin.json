@@ -1,0 +1,9 @@
+{
+  "name": "starter",
+  "version": "0.1.0",
+  "description": "Starter plugin template — duplicate this directory to create new plugins",
+  "author": {
+    "name": "Michael Yau",
+    "email": "michael.yau@gogox.com"
+  }
+}

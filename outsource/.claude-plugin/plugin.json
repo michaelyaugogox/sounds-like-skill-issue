@@ -1,0 +1,9 @@
+{
+  "name": "outsource",
+  "version": "0.1.0",
+  "description": "Take a Jira ticket from URL to a review-ready PR — worktree, branch, implementation, tests, gh pr create.",
+  "author": {
+    "name": "Michael Yau",
+    "email": "michael.yau@gogox.com"
+  }
+}

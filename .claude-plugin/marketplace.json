@@ -1,0 +1,27 @@
+{
+  "name": "sounds-like-skill-issue",
+  "version": "0.1.0",
+  "description": "Michael Yau's personal collection of Claude Code plugins",
+  "owner": {
+    "name": "Michael Yau",
+    "email": "michael.yau@gogox.com"
+  },
+  "plugins": [
+    {
+      "name": "starter",
+      "description": "Starter plugin — example skill, command, and hook scaffolding",
+      "source": {
+        "source": "local",
+        "path": "./starter"
+      }
+    },
+    {
+      "name": "outsource",
+      "description": "Jira ticket URL → review-ready PR (worktree, branch, impl, tests, gh pr create)",
+      "source": {
+        "source": "local",
+        "path": "./outsource"
+      }
+    }
+  ]
+}
