@@ -10,18 +10,12 @@
     {
       "name": "starter",
       "description": "Starter plugin — example skill, command, and hook scaffolding",
-      "source": {
-        "source": "local",
-        "path": "./starter"
-      }
+      "source": "./starter"
     },
     {
       "name": "outsource",
       "description": "Jira ticket URL → review-ready PR (worktree, branch, impl, tests, gh pr create)",
-      "source": {
-        "source": "local",
-        "path": "./outsource"
-      }
+      "source": "./outsource"
     }
   ]
 }
