@@ -21,6 +21,11 @@
       "name": "deskill-me",
       "description": "Install or update every plugin in this marketplace in one go (/deskill-me)",
       "source": "./plugins/deskill-me"
+    },
+    {
+      "name": "pr-review",
+      "description": "Summarize a PR as Problem → Solution → Breaking changes, pulling Jira context when the PR references a ticket",
+      "source": "./plugins/pr-review"
     }
   ]
 }

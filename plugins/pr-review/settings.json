@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Grep",
+      "Glob",
+
+      "Bash(pwd)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+
+      "Bash(git status*)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git rev-parse *)",
+      "Bash(git symbolic-ref *)",
+      "Bash(git branch *)",
+      "Bash(git fetch *)",
+
+      "Bash(gh *)",
+
+      "mcp__claude_ai_Atlassian_Rovo__getJiraIssue",
+      "mcp__claude_ai_Atlassian_Rovo__getJiraIssueRemoteIssueLinks"
+    ]
+  }
+}
